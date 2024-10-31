@@ -9,13 +9,21 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import com.example.locationapp.ui.theme.LocationAppTheme
 
@@ -99,7 +107,32 @@ fun LocationDisplay(
                 )
             }
         }) {
-            Text(text = "Get Location")
+            ZoomableCircularImage(imageRes = R.drawable.pp)
         }
     }
+}
+
+@Composable
+fun ZoomableCircularImage(imageRes: Int) {
+    var scale by remember { mutableStateOf(1f) }
+    var offset by remember { mutableStateOf(Offset.Zero) }
+    Image(
+        painter = painterResource(id = imageRes),
+        contentDescription = "Image Button",
+        modifier = Modifier
+            .size(100.dp) // Adjust size as needed
+            .clip(CircleShape)
+            .pointerInput(Unit) {
+                detectTransformGestures { _, pan, zoom, _ ->
+                    scale = (scale * zoom).coerceIn(1f, 3f)
+                    offset += pan
+                }
+            }
+            .graphicsLayer(
+                scaleX = scale,
+                scaleY = scale,
+                translationX = offset.x,
+                translationY = offset.y
+            )
+    )
 }
